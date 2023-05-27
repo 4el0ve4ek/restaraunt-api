@@ -1,0 +1,9 @@
+postgres:
+  username: "username"
+  password: "password"
+  dbname: "orders"
+  host: "localhost"
+  port: 5433
+
+api:
+  port: 8080
