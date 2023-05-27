@@ -13,15 +13,15 @@ type Optional[T any] struct {
 	present bool
 }
 
-func (o *Optional[T]) IsPresent() bool {
+func (o Optional[T]) IsPresent() bool {
 	return o.present
 }
 
-func (o *Optional[T]) Get() T {
+func (o Optional[T]) Get() T {
 	return o.val
 }
 
-func (o *Optional[T]) GetOrDefault(t T) T {
+func (o Optional[T]) GetOrDefault(t T) T {
 	if o.present {
 		return o.val
 	}

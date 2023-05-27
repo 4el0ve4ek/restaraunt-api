@@ -29,10 +29,9 @@ func (w *jsonWrapper[I, O]) ServeHTTP(request *http.Request) (Response[[]byte], 
 	switch any(input).(type) {
 	case struct{}:
 	default:
-		json.NewDecoder(request.Body)
 		bodyDecoder := json.NewDecoder(request.Body)
 		err := bodyDecoder.Decode(&input)
-		if err != nil && err == io.EOF {
+		if err != nil && errors.Is(err, io.EOF) {
 			break
 		}
 		if err != nil {
