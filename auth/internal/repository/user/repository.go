@@ -7,7 +7,7 @@ import (
 
 	"github.com/4el0ve4ek/restaraunt-api/library/pkg/database/postgres"
 
-	"auth/models"
+	"auth/internal/models"
 )
 
 func NewRepository(db *postgres.DB) *repository {

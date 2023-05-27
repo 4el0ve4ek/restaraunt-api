@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 
-	"auth/models"
+	"auth/internal/models"
 )
 
 type passwordManager interface {

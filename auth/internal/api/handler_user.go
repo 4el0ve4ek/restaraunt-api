@@ -4,11 +4,13 @@ import (
 	"context"
 	"strings"
 
-	"github.com/4el0ve4ek/restaraunt-api/library/pkg/http"
 	"github.com/pkg/errors"
 
+	"github.com/4el0ve4ek/restaraunt-api/library/pkg/http"
+
+	"auth/internal/models"
+
 	"auth/internal/manager/jwt"
-	"auth/models"
 )
 
 type inputGetUser = http.None

@@ -6,7 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"auth/models"
+	"auth/internal/models"
 )
 
 type Manager interface {
