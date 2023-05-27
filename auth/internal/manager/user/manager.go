@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/pkg/errors"
 
@@ -33,6 +34,11 @@ func (m *manager) RegisterUser(ctx context.Context, username, email, userPasswor
 	if err != nil {
 		return "", errors.Wrap(err, "encrypt password")
 	}
+
+	if !m.validateEmail(email) {
+		return "", errors.Wrap(err, "invalid email")
+	}
+
 	userID, err := m.userRepository.AddNewUser(ctx, username, email, passwordEncrypted)
 	if err != nil {
 		return "", errors.Wrap(err, "add new user")
@@ -77,4 +83,10 @@ func (m *manager) GetUserByToken(ctx context.Context, token string) (models.User
 	}
 
 	return user, nil
+}
+
+var emailPattern = regexp.MustCompile(`.+@.+\.`)
+
+func (m *manager) validateEmail(email string) bool {
+	return emailPattern.MatchString(email)
 }
