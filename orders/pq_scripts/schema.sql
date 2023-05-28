@@ -25,10 +25,15 @@ CREATE TABLE order_dish (
     dish_id INT NOT NULL,
     quantity INT NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
-    FOREIGN KEY (order_id) REFERENCES "order"(id),
+    FOREIGN KEY (order_id) REFERENCES "order"(id) ON DELETE CASCADE,
     FOREIGN KEY (dish_id) REFERENCES "dish"(id) ON DELETE CASCADE
 );
 
+INSERT INTO "dish"(name, description, price, quantity, is_available)
+VALUES ('Pizza', 'with pineapples', 10, 20, true);
+
+INSERT INTO "dish"(name, description, price, quantity, is_available)
+VALUES ('Cake', 'with pineapples', 5, 10, true);
 
 -- обновляет столбик updated_at  на каждое изменение строки
 CREATE OR REPLACE FUNCTION update_updated_at_column()
