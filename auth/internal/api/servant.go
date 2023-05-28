@@ -25,7 +25,7 @@ func NewServant(
 	server.Addr = fmt.Sprintf(":%d", cfg.Port)
 	router := chi.NewRouter()
 
-	router.With(middleware.StripSlashes, middleware.Recoverer, middleware.RequestID, middleware.Logger)
+	router.Use(middleware.StripSlashes, middleware.Recoverer, middleware.RequestID, middleware.Logger)
 	router.Handle("/debug/", middleware.Profiler())
 
 	router.Method("POST", "/register", wrap[inputRegisterUser, outputRegisterUser](NewRegisterUserHandler(userManager), logger))

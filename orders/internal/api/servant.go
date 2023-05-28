@@ -10,6 +10,7 @@ import (
 
 	"github.com/4el0ve4ek/restaraunt-api/library/pkg/http"
 	"github.com/4el0ve4ek/restaraunt-api/library/pkg/log"
+
 	"orders/internal/managers/dishes"
 	"orders/internal/managers/order"
 	"orders/internal/services/auth"
@@ -28,7 +29,7 @@ func NewServant(
 	server.Addr = fmt.Sprintf(":%d", cfg.Port)
 	router := chi.NewRouter()
 
-	router.With(middleware.StripSlashes, middleware.RequestID, middleware.Logger, middleware.Recoverer)
+	router.Use(middleware.StripSlashes, middleware.RequestID, middleware.Logger, middleware.Recoverer)
 	router.Handle("/debug/", middleware.Profiler())
 
 	core := core{

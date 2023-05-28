@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	stdhttp "net/http"
 	"os"
 	"os/signal"
@@ -11,6 +12,7 @@ import (
 	"github.com/4el0ve4ek/restaraunt-api/library/pkg/config"
 	"github.com/4el0ve4ek/restaraunt-api/library/pkg/database/postgres"
 	"github.com/4el0ve4ek/restaraunt-api/library/pkg/log"
+
 	"orders/internal/api"
 	dishesmanager "orders/internal/managers/dishes"
 	ordermanager "orders/internal/managers/order"
@@ -59,6 +61,8 @@ func main() {
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
+
+	fmt.Println("listening on " + server.Addr)
 
 	go func() {
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, stdhttp.ErrServerClosed) {
