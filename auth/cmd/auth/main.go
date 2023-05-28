@@ -8,6 +8,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	"auth/internal/repository/session"
 	"github.com/4el0ve4ek/restaraunt-api/library/pkg/config"
 	"github.com/4el0ve4ek/restaraunt-api/library/pkg/database/postgres"
 	"github.com/4el0ve4ek/restaraunt-api/library/pkg/log"
@@ -38,7 +39,8 @@ func main() {
 	}
 	defer db.Close()
 
-	jwtManager := jwt.NewManager(config.JWT)
+	sessionRepository := session.NewRepository(db)
+	jwtManager := jwt.NewManager(config.JWT, sessionRepository)
 	passwordManager := password.NewManager()
 	userRepository := user.NewRepository(db)
 	userManager := usermanager.NewManager(userRepository, passwordManager, jwtManager)

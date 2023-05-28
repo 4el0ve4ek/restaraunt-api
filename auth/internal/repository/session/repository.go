@@ -22,7 +22,7 @@ func (r *repository) AddSession(ctx context.Context, userID int, sessionToken st
 	_, err := r.db.ExecContext(
 		ctx,
 		`
-		INSERT INTO session(user_id, session_token, created_at) VALUES($1, $2, $3);
+		INSERT INTO session(user_id, session_token, expires_at) VALUES($1, $2, $3);
 		`,
 		userID, sessionToken, createdAt,
 	)

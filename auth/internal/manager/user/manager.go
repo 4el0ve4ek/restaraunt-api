@@ -7,12 +7,13 @@ import (
 	"github.com/pkg/errors"
 
 	"auth/internal/models"
+	"github.com/4el0ve4ek/restaraunt-api/library/pkg/optional"
 )
 
 type Manager interface {
 	RegisterUser(ctx context.Context, username, email, userPassword string) (string, error)
 	LoginUser(ctx context.Context, email, userPassword string) (string, error)
-	GetUserByToken(ctx context.Context, token string) (models.User, error)
+	GetUserByToken(ctx context.Context, token string) (optional.Optional[models.User], error)
 }
 
 func NewManager(userRepository userRepository, passwordManager passwordManager, jwtManager tokenManager) *manager {
@@ -71,22 +72,24 @@ func (m *manager) LoginUser(ctx context.Context, email, userPassword string) (st
 	return token, nil
 }
 
-func (m *manager) GetUserByToken(ctx context.Context, token string) (models.User, error) {
+func (m *manager) GetUserByToken(ctx context.Context, token string) (optional.Optional[models.User], error) {
+	ret := optional.NewEmpty[models.User]()
+
 	userID, err := m.jwtManager.ExtractToken(ctx, token)
 	if err != nil {
-		return models.User{}, errors.Wrap(err, "extract token")
+		return ret, errors.Wrap(err, "extract token")
 	}
 
 	if !userID.IsPresent() {
-		return models.User{}, nil
+		return ret, nil
 	}
 
 	user, err := m.userRepository.GetUserWithID(ctx, userID.Get())
 	if err != nil {
-		return models.User{}, errors.Wrap(err, "get user from db")
+		return ret, errors.Wrap(err, "get user from db")
 	}
-
-	return user, nil
+	ret.Set(user)
+	return ret, nil
 }
 
 var emailPattern = regexp.MustCompile(`.+@.+\.`)

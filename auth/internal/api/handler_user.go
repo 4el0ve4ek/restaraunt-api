@@ -2,11 +2,13 @@ package api
 
 import (
 	"context"
+	stdhttp "net/http"
 	"strings"
 
 	"github.com/pkg/errors"
 
 	"github.com/4el0ve4ek/restaraunt-api/library/pkg/http"
+	"github.com/4el0ve4ek/restaraunt-api/library/pkg/optional"
 
 	"auth/internal/models"
 
@@ -17,7 +19,7 @@ type inputGetUser = http.None
 type outputGetUser = models.User
 
 type userGetManager interface {
-	GetUserByToken(ctx context.Context, token string) (models.User, error)
+	GetUserByToken(ctx context.Context, token string) (optional.Optional[models.User], error)
 }
 
 func NewGetUserHandler(userGetManager userGetManager) *getUserHandler {
@@ -38,7 +40,10 @@ func (h *getUserHandler) ServeJSON(r *http.Request, input inputGetUser) (http.Re
 	if err != nil {
 		return ret, errors.Wrap(err, "get user by token")
 	}
-
-	ret.Content.Set(user)
+	if !user.IsPresent() {
+		ret.StatusCode.Set(stdhttp.StatusUnauthorized)
+		return ret, nil
+	}
+	ret.Content.Set(user.Get())
 	return ret, nil
 }

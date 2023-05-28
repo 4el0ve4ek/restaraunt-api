@@ -2,7 +2,8 @@ package jwt
 
 import (
 	"context"
-	"crypto/sha512"
+	"crypto/sha256"
+	"fmt"
 	"math/rand"
 	"strconv"
 	"time"
@@ -51,12 +52,13 @@ func (m *manager) generateToken(salt int) string {
 	alphy := []rune(alph)
 
 	salty := []rune(strconv.Itoa(salt) + " " + m.cfg.SecretKey + " ")
-	salty = salty[: len(salty) : len(salty)+50]
+	hashedValue := make([]rune, len(salty), len(salty)+50)
+	copy(salty, hashedValue)
 
 	for ls := len(salty); ls < cap(salty); ls++ {
-		salty[ls] = alphy[rand.Intn(len(alphy))]
+		salty = append(salty, alphy[rand.Intn(len(alphy))])
 	}
 
-	hashed := sha512.Sum512([]byte(string(salty)))
-	return string(hashed[:])
+	hashed := sha256.Sum256([]byte(string(salty)))
+	return fmt.Sprintf("%x", hashed[:])
 }
