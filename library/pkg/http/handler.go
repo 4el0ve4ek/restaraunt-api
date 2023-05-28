@@ -31,7 +31,9 @@ func (w *wrapper) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 
 	writer.WriteHeader(response.StatusCode.GetOrDefault(http.StatusOK))
 	_, err = writer.Write(response.Content.Get())
-	w.logger.Error(errors.Wrap(err, "write response"))
+	if err != nil {
+		w.logger.Error(errors.Wrap(err, "write response"))
+	}
 }
 
 type Handler interface {
