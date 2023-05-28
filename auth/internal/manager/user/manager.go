@@ -43,7 +43,7 @@ func (m *manager) RegisterUser(ctx context.Context, username, email, userPasswor
 	if err != nil {
 		return "", errors.Wrap(err, "add new user")
 	}
-	token, err := m.jwtManager.CreateToken(userID)
+	token, err := m.jwtManager.CreateToken(ctx, userID)
 	if err != nil {
 		return "", errors.Wrap(err, "create token")
 	}
@@ -64,7 +64,7 @@ func (m *manager) LoginUser(ctx context.Context, email, userPassword string) (st
 		return "", errors.New("passwords not equal")
 	}
 
-	token, err := m.jwtManager.CreateToken(user.ID)
+	token, err := m.jwtManager.CreateToken(ctx, user.ID)
 	if err != nil {
 		return "", errors.Wrap(err, "create token")
 	}
@@ -72,12 +72,16 @@ func (m *manager) LoginUser(ctx context.Context, email, userPassword string) (st
 }
 
 func (m *manager) GetUserByToken(ctx context.Context, token string) (models.User, error) {
-	userID, err := m.jwtManager.ExtractToken(token)
+	userID, err := m.jwtManager.ExtractToken(ctx, token)
 	if err != nil {
 		return models.User{}, errors.Wrap(err, "extract token")
 	}
 
-	user, err := m.userRepository.GetUserWithID(ctx, userID)
+	if !userID.IsPresent() {
+		return models.User{}, nil
+	}
+
+	user, err := m.userRepository.GetUserWithID(ctx, userID.Get())
 	if err != nil {
 		return models.User{}, errors.Wrap(err, "get user from db")
 	}

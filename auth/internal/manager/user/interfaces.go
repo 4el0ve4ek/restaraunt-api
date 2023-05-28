@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"auth/internal/models"
+	"github.com/4el0ve4ek/restaraunt-api/library/pkg/optional"
 )
 
 type passwordManager interface {
@@ -12,8 +13,8 @@ type passwordManager interface {
 }
 
 type tokenManager interface {
-	CreateToken(int) (string, error)
-	ExtractToken(string) (int, error)
+	CreateToken(context.Context, int) (string, error)
+	ExtractToken(context.Context, string) (optional.Optional[int], error)
 }
 
 type userRepository interface {

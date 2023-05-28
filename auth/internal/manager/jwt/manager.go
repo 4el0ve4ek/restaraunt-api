@@ -1,11 +1,15 @@
 package jwt
 
 import (
+	"context"
+	"crypto/sha512"
+	"math/rand"
 	"strconv"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/pkg/errors"
+
+	"github.com/4el0ve4ek/restaraunt-api/library/pkg/optional"
 )
 
 const (
@@ -14,48 +18,45 @@ const (
 	accessTokenTTL = time.Hour * 24 * 7 // 7 days
 )
 
-func NewManager(cfg Config) *manager {
+func NewManager(cfg Config, sessionRepository sessionRepository) *manager {
 	return &manager{
-		cfg: cfg,
+		cfg:               cfg,
+		sessionRepository: sessionRepository,
 	}
 }
 
 type manager struct {
-	cfg Config
+	cfg               Config
+	sessionRepository sessionRepository
 }
 
-func (m *manager) CreateToken(userID int) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
-		ID:        strconv.Itoa(userID),
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(accessTokenTTL)),
-	})
-
-	jwtSignedValue, err := token.SignedString([]byte(m.cfg.SecretKey))
+func (m *manager) CreateToken(ctx context.Context, userID int) (string, error) {
+	sessionToken := m.generateToken(userID)
+	expiresAt := time.Now().Add(accessTokenTTL)
+	err := m.sessionRepository.AddSession(ctx, userID, sessionToken, expiresAt)
 	if err != nil {
-		return "", errors.Wrap(err, "sign token")
+		return "", errors.Wrap(err, "add session to db")
 	}
-	return jwtSignedValue, nil
+
+	return sessionToken, nil
 }
 
-func (m *manager) ExtractToken(jwtToken string) (int, error) {
-	token, err := jwt.ParseWithClaims(jwtToken, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, jwt.ErrTokenUnverifiable
-		}
-		return []byte(m.cfg.SecretKey), nil
-	})
-	if err != nil {
-		return 0, errors.New("Invalid access token")
+func (m *manager) ExtractToken(ctx context.Context, jwtToken string) (optional.Optional[int], error) {
+	userID, err := m.sessionRepository.GetSession(ctx, jwtToken)
+	return userID, errors.Wrap(err, "get session from db")
+}
+
+func (m *manager) generateToken(salt int) string {
+	alph := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+	alphy := []rune(alph)
+
+	salty := []rune(strconv.Itoa(salt) + " " + m.cfg.SecretKey + " ")
+	salty = salty[: len(salty) : len(salty)+50]
+
+	for ls := len(salty); ls < cap(salty); ls++ {
+		salty[ls] = alphy[rand.Intn(len(alphy))]
 	}
 
-	claims, ok := token.Claims.(*jwt.RegisteredClaims)
-	if !ok || !token.Valid {
-		return 0, errors.New("Invalid access token")
-	}
-
-	id, err := strconv.Atoi(claims.ID)
-	if err != nil {
-		return 0, err
-	}
-	return id, nil
+	hashed := sha512.Sum512([]byte(string(salty)))
+	return string(hashed[:])
 }
