@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 
+	"github.com/lib/pq"
 	"github.com/pkg/errors"
 
 	"github.com/4el0ve4ek/restaraunt-api/library/pkg/database/postgres"
@@ -18,24 +19,23 @@ type repository struct {
 	db *postgres.DB
 }
 
-func (r *repository) AddNewUser(ctx context.Context, username, email, encryptedPassword string) (int, error) {
-	row := r.db.QueryRowContext(
+func (r *repository) AddNewUser(ctx context.Context, username, email, encryptedPassword string) (bool, error) {
+	_, err := r.db.ExecContext(
 		ctx,
 		`
 		INSERT INTO "user"(username, email, password_hash, role)
  		VALUES($1, $2, $3, 'customer') 
- 		RETURNING id;
  		`,
 		username, email, encryptedPassword,
 	)
-	if err := row.Err(); err != nil {
-		return 0, errors.Wrap(err, "unable to add")
+	if err != nil {
+		pqErr, ok := err.(*pq.Error)
+		if ok && pqErr.Code == ("23505") {
+			return true, nil
+		}
+		return false, errors.Wrap(err, "unable to add")
 	}
-	var userID int
-	if err := row.Scan(&userID); err != nil {
-		return 0, errors.Wrap(err, "unable to scan user id")
-	}
-	return userID, nil
+	return false, nil
 }
 
 func (r *repository) GetUserWithID(ctx context.Context, userID int) (models.User, error) {

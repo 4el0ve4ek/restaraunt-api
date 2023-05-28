@@ -25,7 +25,7 @@ func (w *wrapper) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	response, err := w.h.ServeHTTP(request)
 	if err != nil {
 		w.logger.Error(errors.Wrap(err, "serve http"))
-		writer.WriteHeader(http.StatusInternalServerError)
+		writer.WriteHeader(response.StatusCode.GetOrDefault(http.StatusInternalServerError))
 		return
 	}
 

@@ -11,7 +11,10 @@ import (
 )
 
 type Manager interface {
-	RegisterUser(ctx context.Context, username, email, userPassword string) (string, error)
+	RegisterUser(ctx context.Context, username, email, userPassword string) (struct {
+		FieldsCollide bool
+		InvalidEmail  bool
+	}, error)
 	LoginUser(ctx context.Context, email, userPassword string) (string, error)
 	GetUserByToken(ctx context.Context, token string) (optional.Optional[models.User], error)
 }
@@ -30,25 +33,34 @@ type manager struct {
 	userRepository  userRepository
 }
 
-func (m *manager) RegisterUser(ctx context.Context, username, email, userPassword string) (string, error) {
+func (m *manager) RegisterUser(ctx context.Context, username, email, userPassword string) (struct {
+	FieldsCollide bool
+	InvalidEmail  bool
+}, error) {
+	var ret struct {
+		FieldsCollide bool
+		InvalidEmail  bool
+	}
+
 	passwordEncrypted, err := m.passwordManager.Encrypt(userPassword)
 	if err != nil {
-		return "", errors.Wrap(err, "encrypt password")
+		return ret, errors.Wrap(err, "encrypt password")
 	}
 
 	if !m.validateEmail(email) {
-		return "", errors.Wrap(err, "invalid email")
+		ret.InvalidEmail = true
+		return ret, nil
 	}
 
-	userID, err := m.userRepository.AddNewUser(ctx, username, email, passwordEncrypted)
+	namesCollide, err := m.userRepository.AddNewUser(ctx, username, email, passwordEncrypted)
 	if err != nil {
-		return "", errors.Wrap(err, "add new user")
+		return ret, errors.Wrap(err, "add new user")
 	}
-	token, err := m.jwtManager.CreateToken(ctx, userID)
-	if err != nil {
-		return "", errors.Wrap(err, "create token")
+
+	if namesCollide {
+		ret.FieldsCollide = true
 	}
-	return token, nil
+	return ret, nil
 }
 
 func (m *manager) LoginUser(ctx context.Context, email, userPassword string) (string, error) {

@@ -2,9 +2,11 @@ package api
 
 import (
 	"context"
+	stdhttp "net/http"
+
+	"github.com/pkg/errors"
 
 	"github.com/4el0ve4ek/restaraunt-api/library/pkg/http"
-	"github.com/pkg/errors"
 )
 
 type inputLoginUser = struct {
@@ -31,6 +33,7 @@ func (h *loginUserHandler) ServeJSON(r *http.Request, input inputLoginUser) (htt
 	var ret http.Response[outputLoginUser]
 	token, err := h.loginManager.LoginUser(r.Context(), input.Email, input.Password)
 	if err != nil {
+		ret.StatusCode.Set(stdhttp.StatusBadRequest)
 		return ret, errors.Wrap(err, "login user")
 	}
 	ret.Content.Set(outputLoginUser{

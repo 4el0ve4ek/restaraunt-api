@@ -18,7 +18,7 @@ type tokenManager interface {
 }
 
 type userRepository interface {
-	AddNewUser(ctx context.Context, username, email, encryptedPassword string) (int, error)
+	AddNewUser(ctx context.Context, username, email, encryptedPassword string) (bool, error)
 	GetUserWithID(ctx context.Context, userID int) (models.User, error)
 	GetUserWithEmail(ctx context.Context, email string) (models.User, error)
 }
