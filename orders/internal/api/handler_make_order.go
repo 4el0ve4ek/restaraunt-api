@@ -2,6 +2,7 @@ package api
 
 import (
 	stdhttp "net/http"
+	"strconv"
 
 	"github.com/pkg/errors"
 
@@ -10,8 +11,8 @@ import (
 )
 
 type inputMakeOrder = struct {
-	DishIDToQuantity map[int]int `json:"dishes"`
-	SpecialRequests  string      `json:"special_requests"`
+	DishIDToQuantity map[string]int `json:"dishes"`
+	SpecialRequests  string         `json:"special_requests"`
 }
 type outputMakeOrder = struct {
 	OrderID int `json:"order_id"`
@@ -42,7 +43,17 @@ func (h *makeOrderHandler) ServeJSON(ctx context.Context, r *http.Request, input
 		return ret, nil
 	}
 
-	status, err := h.makeOrderManager.AddOrder(ctx, input.DishIDToQuantity, input.SpecialRequests)
+	dishIDToQuantity := make(map[int]int, len(input.DishIDToQuantity))
+	for id, quantity := range input.DishIDToQuantity {
+		dishID, err := strconv.Atoi(id)
+		if err != nil {
+			ret.StatusCode.Set(stdhttp.StatusBadRequest)
+			return ret, errors.Wrap(err, "parse dishID")
+		}
+		dishIDToQuantity[dishID] = quantity
+	}
+
+	status, err := h.makeOrderManager.AddOrder(ctx, dishIDToQuantity, input.SpecialRequests)
 	if err != nil {
 		return ret, errors.Wrap(err, "add dish")
 	}

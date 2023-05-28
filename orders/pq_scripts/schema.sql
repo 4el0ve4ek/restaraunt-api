@@ -26,7 +26,7 @@ CREATE TABLE order_dish (
     quantity INT NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
     FOREIGN KEY (order_id) REFERENCES "order"(id),
-    FOREIGN KEY (dish_id) REFERENCES "dish"(id)
+    FOREIGN KEY (dish_id) REFERENCES "dish"(id) ON DELETE CASCADE
 );
 
 

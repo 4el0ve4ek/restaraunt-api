@@ -77,9 +77,6 @@ func (r *repository) GetOrderByID(ctx context.Context, orderID int) (models.Orde
 	if err != nil {
 		return models.Order{}, errors.Wrap(err, "scan rows")
 	}
-	if !rows.NextResultSet() {
-		return models.Order{}, nil
-	}
 	for rows.Next() {
 		var orderDish models.OrderDish
 		err := rows.Scan(&orderDish.DishID, &orderDish.Quantity, &orderDish.Price)
@@ -88,7 +85,7 @@ func (r *repository) GetOrderByID(ctx context.Context, orderID int) (models.Orde
 		}
 		order.Dishes = append(order.Dishes, orderDish)
 	}
-
+	rows.Close()
 	return order, nil
 }
 
@@ -96,7 +93,7 @@ func (r *repository) GetWaitingOrdersID(ctx context.Context) ([]int, error) {
 	rows, err := r.db.QueryContext(
 		ctx,
 		`
-		SELECT id FROM "order" WHERE status = "waiting"
+		SELECT id FROM "order" WHERE status = 'waiting';
 		`,
 	)
 	if err != nil {
@@ -116,7 +113,7 @@ func (r *repository) GetWaitingOrdersID(ctx context.Context) ([]int, error) {
 func (r *repository) SetProcessingOrderByID(ctx context.Context, orderID int) error {
 	_, err := r.db.ExecContext(
 		ctx,
-		`UPDATE "order" SET status = "processing" WHERE id = $1`,
+		`UPDATE "order" SET status = 'processing' WHERE id = $1`,
 		orderID,
 	)
 	return errors.Wrap(err, "update status")
@@ -125,7 +122,7 @@ func (r *repository) SetProcessingOrderByID(ctx context.Context, orderID int) er
 func (r *repository) SetSuccessOrderByID(ctx context.Context, orderID int) error {
 	_, err := r.db.ExecContext(
 		ctx,
-		`UPDATE "order" SET status = "success" WHERE id = $1`,
+		`UPDATE "order" SET status = 'success' WHERE id = $1`,
 		orderID,
 	)
 	return errors.Wrap(err, "update status")
@@ -134,8 +131,17 @@ func (r *repository) SetSuccessOrderByID(ctx context.Context, orderID int) error
 func (r *repository) SetCancelOrderByID(ctx context.Context, orderID int) error {
 	_, err := r.db.ExecContext(
 		ctx,
-		`UPDATE "order" SET status = "cancel" WHERE id = $1`,
+		`UPDATE "order" SET status = 'cancel' WHERE id = $1`,
 		orderID,
 	)
 	return errors.Wrap(err, "update status")
+}
+
+func (r *repository) ReduceDishQuantity(ctx context.Context, dishID int, quantity int) error {
+	_, err := r.db.ExecContext(
+		ctx,
+		`UPDATE "dish" SET quantity = quantity - $2 WHERE id = $1`,
+		dishID, quantity,
+	)
+	return errors.Wrap(err, "update quantity")
 }

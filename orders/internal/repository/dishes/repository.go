@@ -30,13 +30,10 @@ func (r *repository) GetAllDishes(ctx context.Context) ([]models.Dish, error) {
 	if err != nil {
 		return []models.Dish{}, errors.Wrap(err, "do query")
 	}
-	if !rows.NextResultSet() {
-		return []models.Dish{}, nil
-	}
 	ret := make([]models.Dish, 0)
 	for rows.Next() {
 		var dish models.Dish
-		err := rows.Scan(&dish.ID, &dish.Description, &dish.Price, &dish.Quantity, &dish.Available)
+		err := rows.Scan(&dish.ID, &dish.Name, &dish.Description, &dish.Price, &dish.Quantity, &dish.Available)
 		if err != nil {
 			return []models.Dish{}, errors.Wrap(err, "scan row")
 		}
@@ -61,13 +58,10 @@ func (r *repository) GetAvailableDishes(ctx context.Context) ([]models.Dish, err
 	if err != nil {
 		return []models.Dish{}, errors.Wrap(err, "do query")
 	}
-	if !rows.NextResultSet() {
-		return []models.Dish{}, nil
-	}
 	ret := make([]models.Dish, 0)
 	for rows.Next() {
 		var dish models.Dish
-		err := rows.Scan(&dish.ID, &dish.Description, &dish.Price, &dish.Quantity, &dish.Available)
+		err := rows.Scan(&dish.ID, &dish.Name, &dish.Description, &dish.Price, &dish.Quantity, &dish.Available)
 		if err != nil {
 			return []models.Dish{}, errors.Wrap(err, "scan row")
 		}
@@ -120,7 +114,7 @@ func (r *repository) AddDish(ctx context.Context, dish models.Dish) error {
 	_, err := r.db.ExecContext(
 		ctx,
 		`
-		INSERT INTO dish (name, desicription, price, quantity, is_available)
+		INSERT INTO dish (name, description, price, quantity, is_available)
 		VALUES ($1, $2, $3, $4, $5)
 		`,
 		dish.Name, dish.Description, dish.Price, dish.Quantity, dish.Available,

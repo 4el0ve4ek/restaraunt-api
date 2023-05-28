@@ -1,6 +1,8 @@
 package order
 
 import (
+	"fmt"
+
 	"github.com/pkg/errors"
 
 	"orders/internal/context"
@@ -68,6 +70,7 @@ func (m *manager) AddOrder(ctx context.Context, dishesToQuantity map[int]int, sp
 		}
 		if quantity > dish.Quantity {
 			ret.NotEnoughQuantity = true
+			fmt.Println(1)
 			return ret, nil
 		}
 		order.Dishes = append(order.Dishes, models.OrderDish{
@@ -76,6 +79,9 @@ func (m *manager) AddOrder(ctx context.Context, dishesToQuantity map[int]int, sp
 			Price:    dish.Price,
 		})
 	}
+	fmt.Println(order.Dishes)
+	fmt.Println(dishesToQuantity)
+	fmt.Println(menuDishes)
 	if len(order.Dishes) != len(dishesToQuantity) {
 		ret.NoSuchDishes = true
 		return ret, nil

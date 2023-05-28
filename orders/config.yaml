@@ -2,8 +2,12 @@ postgres:
   username: "username"
   password: "password"
   dbname: "orders"
-  host: "localhost"
-  port: 5433
+  host: "ordersdb"
+  port: 5432
 
 api:
+  port: 8081
+
+auth:
+  host: auth
   port: 8080

@@ -95,9 +95,17 @@ func (p *processor) tryTakeOrder() error {
 		needCancel = true
 	}
 	if needCancel {
-		return errors.Wrap(p.orderRepository.SetCancelOrderByID(p.ctx, processedOrder.ID), " setcancel order")
+		return errors.Wrap(p.orderRepository.SetCancelOrderByID(p.ctx, processedOrder.ID), " set cancel order")
 	}
 
 	time.Sleep(30 * time.Second)
-	return errors.Wrap(p.orderRepository.SetSuccessOrderByID(p.ctx, processedOrder.ID), "set success order")
+	err = p.orderRepository.SetSuccessOrderByID(p.ctx, processedOrder.ID)
+	if err != nil {
+		return errors.Wrap(err, "set success order")
+	}
+
+	for dishID, quantity := range dishToQuantity {
+		p.orderRepository.ReduceDishQuantity(p.ctx, dishID, quantity)
+	}
+	return nil
 }

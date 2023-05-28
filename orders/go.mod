@@ -2,12 +2,12 @@ module orders
 
 go 1.20
 
-replace github.com/4el0ve4ek/restaraunt-api/library => ../library
+//replace github.com/4el0ve4ek/restaraunt-api/library => ../library
 
 require (
-	github.com/4el0ve4ek/restaraunt-api/library v0.0.0-00010101000000-000000000000
-	github.com/pkg/errors v0.9.1
+	github.com/4el0ve4ek/restaraunt-api/library v0.0.0-20230528113506-d3e9b12cded8
 	github.com/go-chi/chi/v5 v5.0.8
+	github.com/pkg/errors v0.9.1
 )
 
 require (

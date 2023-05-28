@@ -28,7 +28,9 @@ func NewContext(
 		if err != nil {
 			return ret, errors.Wrap(err, "auth error")
 		}
-		ret.user.Set(user)
+		if user.IsPresent() {
+			ret.user.Set(user.Get())
+		}
 	}
 
 	return ret, nil

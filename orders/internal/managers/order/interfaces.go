@@ -13,6 +13,7 @@ type orderRepository interface {
 	SetSuccessOrderByID(ctx stdcontext.Context, orderID int) error
 	SetProcessingOrderByID(ctx stdcontext.Context, orderID int) error
 	SetCancelOrderByID(ctx stdcontext.Context, orderID int) error
+	ReduceDishQuantity(ctx stdcontext.Context, id int, quantity int) error
 }
 
 type dishesGetter interface {

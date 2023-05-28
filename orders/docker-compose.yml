@@ -9,8 +9,8 @@ services:
       POSTGRES_USER: "username"
       POSTGRES_PASSWORD: "password"
       POSTGRES_DB: "orders"
-    ports:
-      - "5433:5432"
+#    ports:
+#      - "5433:5432"
     volumes:
       - ./pq_scripts/schema.sql:/docker-entrypoint-initdb.d/init.sql
       - ./postgres-data:/var/lib/postgresql/data
@@ -23,12 +23,6 @@ services:
       dockerfile: ./Dockerfile
     container_name: orders
     ports:
-      - "8081:8080"
+      - "8081:8081"
     depends_on:
       - db
-#
-#  adminer:
-#    image: adminer
-#    restart: always
-#    ports:
-#      - "8080:8080"
