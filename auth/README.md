@@ -24,7 +24,7 @@
      - Сообщение - ```{"email" : "<email>", "password": "<password>"}```
      - Пример curl-запроса:
        ```sh
-       curl localhost:8080/login --data '{"email" : "ivan@mail.ru", "password": "ivan"}' -vv
+       curl localhost:8080/login --data '{"email" : "ivan1@mail.ru", "password": "ivan"}' -vv
        ```
      - Пример ответа - `{"jwt_token":"20ee6dac6bd03313ee389ac566e0426afc89a752de8655ca14c04f39d76eb7e2"}`
      - Возможные статус коды:
