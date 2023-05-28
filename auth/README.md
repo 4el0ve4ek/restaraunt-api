@@ -6,10 +6,11 @@
 
     - Метод - `POST`
     - Путь - `/register` 
+    - Если добавить query-параметр `role=manager` или `role=chef`, то новому пользователю будет выдана эта роль 
     - Сообщение - ```{"username": "<username>", "email" : "<email>", "password": "<password>"}```
     - Пример curl-запроса:
       ```sh
-      curl localhost:8080/register --data '{"username": "ivan", "email" : "ivan@mail.ru", "password": "ivan"}' -vv
+      curl localhost:8080/register?role=manager --data '{"username": "ivan", "email" : "ivan@mail.ru", "password": "ivan"}' -vv
       ```
     - Пример ответа - `{"message":"success"}`
     - Возможные статус коды:

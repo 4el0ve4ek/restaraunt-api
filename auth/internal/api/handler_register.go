@@ -4,6 +4,7 @@ import (
 	"context"
 	stdhttp "net/http"
 
+	"github.com/4el0ve4ek/restaraunt-api/library/pkg/optional"
 	"github.com/pkg/errors"
 
 	"github.com/4el0ve4ek/restaraunt-api/library/pkg/http"
@@ -19,7 +20,7 @@ type outputRegisterUser = struct {
 }
 
 type registerManager interface {
-	RegisterUser(ctx context.Context, username, email, userPassword string) (struct {
+	RegisterUser(ctx context.Context, username, email, userPassword string, role optional.Optional[string]) (struct {
 		FieldsCollide bool
 		InvalidEmail  bool
 	}, error)
@@ -35,7 +36,14 @@ type registerUserHandler struct {
 
 func (h *registerUserHandler) ServeJSON(r *http.Request, input inputRegisterUser) (http.Response[outputRegisterUser], error) {
 	var ret http.Response[outputRegisterUser]
-	status, err := h.registerManager.RegisterUser(r.Context(), input.Username, input.Email, input.Password)
+
+	var queryRole optional.Optional[string]
+	query := r.URL.Query()
+	if query.Has("role") {
+		queryRole.Set(query.Get("role"))
+	}
+
+	status, err := h.registerManager.RegisterUser(r.Context(), input.Username, input.Email, input.Password, queryRole)
 	if err != nil {
 		return ret, errors.Wrap(err, "register user")
 	}

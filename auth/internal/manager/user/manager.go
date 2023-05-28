@@ -6,12 +6,13 @@ import (
 
 	"github.com/pkg/errors"
 
-	"auth/internal/models"
 	"github.com/4el0ve4ek/restaraunt-api/library/pkg/optional"
+
+	"auth/internal/models"
 )
 
 type Manager interface {
-	RegisterUser(ctx context.Context, username, email, userPassword string) (struct {
+	RegisterUser(ctx context.Context, username, email, userPassword string, role optional.Optional[string]) (struct {
 		FieldsCollide bool
 		InvalidEmail  bool
 	}, error)
@@ -33,7 +34,7 @@ type manager struct {
 	userRepository  userRepository
 }
 
-func (m *manager) RegisterUser(ctx context.Context, username, email, userPassword string) (struct {
+func (m *manager) RegisterUser(ctx context.Context, username, email, userPassword string, role optional.Optional[string]) (struct {
 	FieldsCollide bool
 	InvalidEmail  bool
 }, error) {
@@ -52,7 +53,16 @@ func (m *manager) RegisterUser(ctx context.Context, username, email, userPasswor
 		return ret, nil
 	}
 
-	namesCollide, err := m.userRepository.AddNewUser(ctx, username, email, passwordEncrypted)
+	userRole := role.GetOrDefault(string(models.Customer))
+	var resultRole models.Role
+	switch models.Role(userRole) {
+	case models.Customer, models.Manager, models.Chef:
+		resultRole = models.Role(userRole)
+	default:
+		resultRole = models.Customer
+	}
+
+	namesCollide, err := m.userRepository.AddNewUser(ctx, username, email, passwordEncrypted, resultRole)
 	if err != nil {
 		return ret, errors.Wrap(err, "add new user")
 	}

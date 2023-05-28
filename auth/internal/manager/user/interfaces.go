@@ -3,8 +3,9 @@ package user
 import (
 	"context"
 
-	"auth/internal/models"
 	"github.com/4el0ve4ek/restaraunt-api/library/pkg/optional"
+
+	"auth/internal/models"
 )
 
 type passwordManager interface {
@@ -18,7 +19,7 @@ type tokenManager interface {
 }
 
 type userRepository interface {
-	AddNewUser(ctx context.Context, username, email, encryptedPassword string) (bool, error)
+	AddNewUser(ctx context.Context, username, email, encryptedPassword string, role models.Role) (bool, error)
 	GetUserWithID(ctx context.Context, userID int) (models.User, error)
 	GetUserWithEmail(ctx context.Context, email string) (models.User, error)
 }

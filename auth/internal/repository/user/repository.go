@@ -19,14 +19,14 @@ type repository struct {
 	db *postgres.DB
 }
 
-func (r *repository) AddNewUser(ctx context.Context, username, email, encryptedPassword string) (bool, error) {
+func (r *repository) AddNewUser(ctx context.Context, username, email, encryptedPassword string, role models.Role) (bool, error) {
 	_, err := r.db.ExecContext(
 		ctx,
 		`
 		INSERT INTO "user"(username, email, password_hash, role)
- 		VALUES($1, $2, $3, 'customer') 
+ 		VALUES($1, $2, $3, $4) 
  		`,
-		username, email, encryptedPassword,
+		username, email, encryptedPassword, role,
 	)
 	if err != nil {
 		pqErr, ok := err.(*pq.Error)
