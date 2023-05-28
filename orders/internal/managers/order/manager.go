@@ -59,6 +59,9 @@ func (m *manager) AddOrder(ctx context.Context, dishesToQuantity map[int]int, sp
 	}
 
 	for _, dish := range menuDishes {
+		if !dish.Available {
+			continue
+		}
 		quantity, ok := dishesToQuantity[dish.ID]
 		if !ok {
 			continue

@@ -91,3 +91,51 @@ func (r *repository) GetOrderByID(ctx context.Context, orderID int) (models.Orde
 
 	return order, nil
 }
+
+func (r *repository) GetWaitingOrdersID(ctx context.Context) ([]int, error) {
+	rows, err := r.db.QueryContext(
+		ctx,
+		`
+		SELECT id FROM "order" WHERE status = "waiting"
+		`,
+	)
+	if err != nil {
+		return []int{}, errors.Wrap(err, "select waiting")
+	}
+	ret := make([]int, 0)
+	for rows.Next() {
+		var id int
+		if err := rows.Scan(&id); err != nil {
+			return []int{}, errors.Wrap(err, "scan order id")
+		}
+		ret = append(ret, id)
+	}
+	return ret, nil
+}
+
+func (r *repository) SetProcessingOrderByID(ctx context.Context, orderID int) error {
+	_, err := r.db.ExecContext(
+		ctx,
+		`UPDATE "order" SET status = "processing" WHERE id = $1`,
+		orderID,
+	)
+	return errors.Wrap(err, "update status")
+}
+
+func (r *repository) SetSuccessOrderByID(ctx context.Context, orderID int) error {
+	_, err := r.db.ExecContext(
+		ctx,
+		`UPDATE "order" SET status = "success" WHERE id = $1`,
+		orderID,
+	)
+	return errors.Wrap(err, "update status")
+}
+
+func (r *repository) SetCancelOrderByID(ctx context.Context, orderID int) error {
+	_, err := r.db.ExecContext(
+		ctx,
+		`UPDATE "order" SET status = "cancel" WHERE id = $1`,
+		orderID,
+	)
+	return errors.Wrap(err, "update status")
+}

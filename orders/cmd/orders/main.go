@@ -42,9 +42,9 @@ func main() {
 	dishManager := dishesmanager.NewManager(dishRepository)
 
 	orderRepository := order.NewRepository(db)
-	orderManager := ordermanager.NewManager(orderRepository, dishManager)
+	orderManager := ordermanager.NewManager(orderRepository, dishRepository)
 
-	processor := ordermanager.NewProcessor(orderRepository)
+	processor := ordermanager.NewProcessor(logger, orderRepository, dishRepository)
 	defer processor.Close()
 	go processor.Run()
 

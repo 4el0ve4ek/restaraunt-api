@@ -41,7 +41,7 @@ func (r *repository) GetAllDishes(ctx context.Context) ([]models.Dish, error) {
 			return []models.Dish{}, errors.Wrap(err, "scan row")
 		}
 
-		if dish.Quantity == 0 {
+		if dish.Quantity <= 0 {
 			dish.Available = false
 		}
 
